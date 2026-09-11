@@ -1,0 +1,41 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(git status*)",
+      "Bash(git diff*)",
+      "Bash(git log*)",
+      "Bash(git add*)",
+      "Bash(git commit*)",
+      "Bash(uv run pytest*)",
+      "Bash(ruff check*)",
+      "Bash(ruff format*)",
+      "Bash(uv run ruff*)",
+      "Bash(bandit*)",
+      "Bash(uv run bandit*)",
+      "Bash(pre-commit run*)"
+    ],
+    "deny": [
+      "Bash(git push --force*)",
+      "Bash(git push -f*)",
+      "Bash(git push * --force*)",
+      "Bash(git push * -f*)",
+      "Bash(git push --force-with-lease*)",
+      "Bash(git push * --force-with-lease*)",
+      "Bash(git reset --hard*)",
+      "Bash(git clean*)",
+      "Bash(rm -rf*)",
+      "Bash(rm -fr*)",
+      "Bash(type .env*)",
+      "Bash(cat .env*)",
+      "Bash(Get-Content .env*)",
+      "Bash(more .env*)",
+      "Read(.env)",
+      "Read(.env.local)",
+      "Read(.env.development)",
+      "Read(.env.production)",
+      "Read(.env.test)",
+      "Read(.env.staging)",
+      "Read(.env.ci)"
+    ]
+  }
+}
