@@ -1,0 +1,30 @@
+# Local pre-commit checks. gitleaks does NOT run here (Windows has neither
+# Go nor Docker available in this setup) — it runs in CI instead, on the
+# Linux runner, against the real pinned version. detect-private-key and
+# detect-secrets are the local, dependency-free line of defense against
+# committing secrets. See docs/security.md for the full picture.
+
+repos:
+  - repo: https://github.com/pre-commit/pre-commit-hooks
+    rev: v6.0.0
+    hooks:
+      - id: detect-private-key
+      - id: check-added-large-files
+      - id: mixed-line-ending
+        args: ["--fix=lf"]
+      - id: check-merge-conflict
+      - id: end-of-file-fixer
+
+  - repo: https://github.com/Yelp/detect-secrets
+    rev: v1.5.0
+    hooks:
+      - id: detect-secrets
+        args: ["--baseline", ".secrets.baseline"]
+        exclude: ^(\.secrets\.baseline|uv\.lock|package-lock\.json)$
+
+  - repo: https://github.com/astral-sh/ruff-pre-commit
+    rev: v0.16.7
+    hooks:
+      - id: ruff-check
+        args: ["--fix"]
+      - id: ruff-format
