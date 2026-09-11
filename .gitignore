@@ -149,6 +149,8 @@ activemq-data/
 
 # Environments
 .env
+.env.*
+!.env.example
 .envrc
 .venv
 env/
@@ -216,3 +218,32 @@ __marimo__/
 
 # Streamlit
 .streamlit/secrets.toml
+
+# --- Faro-specific ---
+
+# Node / Vite frontend
+node_modules/
+frontend/dist/
+frontend/.vite/
+*.local
+
+# uv
+.uv-cache/
+
+# Evaluation data: raw datasets and cached results are never committed.
+# (eval/datasets/README.md documents source + license per dataset instead.)
+eval/datasets/raw/
+eval/results/cache/
+
+# Windows OS cruft
+Thumbs.db
+desktop.ini
+$RECYCLE.BIN/
+
+# macOS OS cruft (contributors may be on Mac)
+.DS_Store
+
+# Editors
+.vscode/*
+!.vscode/extensions.json
+.idea/
