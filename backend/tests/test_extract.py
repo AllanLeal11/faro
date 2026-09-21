@@ -28,7 +28,7 @@ _EMPTY_PAYLOAD = {
 def _settings(**overrides):
     defaults = {
         "mock_mode": False,
-        "nebius_api_key": "test-key",
+        "nebius_api_key": "test-key",  # pragma: allowlist secret gitleaks:allow
         "nebius_base_url": "https://tokenfactory.test/v1",
         "model_extract": "test-extract-model",
     }
