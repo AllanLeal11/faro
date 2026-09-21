@@ -1,0 +1,17 @@
+version: 2
+updates:
+  # Backend Python dependencies (CLAUDE.md section 12.11).
+  - package-ecosystem: "uv"
+    directory: "/backend"
+    schedule:
+      interval: "weekly"
+
+  # Pin/verify the GitHub Actions themselves too — a compromised Action
+  # is a supply-chain risk just like a compromised package.
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    schedule:
+      interval: "weekly"
+
+  # TODO(frontend): add a package-ecosystem: "npm" entry pointing at
+  # /frontend once frontend/package.json exists.

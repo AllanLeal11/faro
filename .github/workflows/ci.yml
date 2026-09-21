@@ -1,0 +1,73 @@
+name: CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+# Least-privilege by default (CLAUDE.md section 12.11): every job below
+# only needs to read the checked-out code.
+permissions:
+  contents: read
+
+jobs:
+  backend:
+    name: Backend (lint, security, tests)
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: backend
+    steps:
+      - uses: actions/checkout@v5
+
+      - name: Install uv
+        uses: astral-sh/setup-uv@bec219d24cd3e171d82865faccec33120bb574f4 # v10.1.0
+        with:
+          enable-cache: true
+          python-version: "3.13"
+
+      # --locked fails the build if uv.lock is out of sync with
+      # pyproject.toml, instead of silently re-resolving it in CI.
+      - name: Install dependencies
+        run: uv sync --locked --all-groups
+
+      - name: Ruff (lint)
+        run: uv run ruff check .
+
+      - name: Ruff (format check)
+        run: uv run ruff format --check .
+
+      - name: Bandit (static security analysis)
+        run: uv run bandit -q -r app
+
+      - name: pip-audit (dependency vulnerabilities, section 12.11)
+        run: uv run pip-audit --strict
+
+      - name: pytest
+        run: uv run pytest -q
+
+  gitleaks:
+    name: Gitleaks (secret scanning, section 12.1)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v5
+        with:
+          # Full history: gitleaks needs every past commit to catch a
+          # secret that was later removed but never rotated.
+          fetch-depth: 0
+
+      - name: Scan history for secrets
+        run: docker run --rm -v "$PWD:/repo" ghcr.io/gitleaks/gitleaks:latest git -v /repo
+
+  semgrep:
+    name: Semgrep (static analysis, section 12.12)
+    runs-on: ubuntu-latest
+    container:
+      # :latest is intentional for a vulnerability scanner: we want the
+      # newest rule pack, not a pinned/stale one.
+      image: semgrep/semgrep:latest
+    steps:
+      - uses: actions/checkout@v5
+      # Runs fully offline against Semgrep's bundled community rules —
+      # no SEMGREP_APP_TOKEN / semgrep.dev account needed.
+      - run: semgrep scan --config auto --error
