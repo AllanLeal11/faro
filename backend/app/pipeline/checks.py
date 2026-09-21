@@ -160,9 +160,7 @@ def _phone_key(phone: str) -> str:
 def check_domain_lookalike(
     domains: list[str], trusted_entities: list[TrustedEntity]
 ) -> list[Evidence]:
-    trusted_domains = {
-        _normalize_domain(d) for entity in trusted_entities for d in entity.domains
-    }
+    trusted_domains = {_normalize_domain(d) for entity in trusted_entities for d in entity.domains}
     findings: list[tuple[EvidenceResult, str]] = []
 
     for raw_domain in domains:
@@ -455,15 +453,12 @@ def check_urgent_transfer_request(message: ExtractedMessage) -> list[Evidence]:
             id="",
             type="urgent_transfer_request",
             result="clear",
-            detail="The message does not combine a bank transfer request with urgent "
-            "pressure.",
+            detail="The message does not combine a bank transfer request with urgent pressure.",
         )
     ]
 
 
-def run_checks(
-    message: ExtractedMessage, trusted_entities: list[TrustedEntity]
-) -> list[Evidence]:
+def run_checks(message: ExtractedMessage, trusted_entities: list[TrustedEntity]) -> list[Evidence]:
     """Run every deterministic check and return one flat, id-assigned list."""
     evidence = [
         *check_domain_lookalike(message.domains, trusted_entities),
