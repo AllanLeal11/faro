@@ -5,6 +5,11 @@ updates:
     directory: "/backend"
     schedule:
       interval: "weekly"
+    # Wait a week before proposing a newly published version: a brand new
+    # release is exactly when a compromised/malicious package is most
+    # likely to still be live (semgrep: uv-missing-dependency-cooldown).
+    cooldown:
+      default-days: 7
 
   # Pin/verify the GitHub Actions themselves too — a compromised Action
   # is a supply-chain risk just like a compromised package.
@@ -12,6 +17,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
+    cooldown:
+      default-days: 7
 
   # TODO(frontend): add a package-ecosystem: "npm" entry pointing at
   # /frontend once frontend/package.json exists.

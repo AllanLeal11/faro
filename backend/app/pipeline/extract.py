@@ -114,7 +114,12 @@ def _call_llm(redacted_text: str, settings: Settings) -> dict[str, Any]:
         logger.warning("Nebius Token Factory extraction request timed out.")
         raise ExtractionFailedError("Nebius Token Factory request timed out.") from exc
     except APIError as exc:
-        logger.warning("Nebius Token Factory extraction request failed: %s", type(exc).__name__)
+        # Only the exception's class name is logged (e.g. "RateLimitError"),
+        # never str(exc)/exc.args, which could echo request/response
+        # details — semgrep's logger-credential-disclosure rule can't see
+        # that distinction, hence the inline suppression below.
+        error_name = type(exc).__name__
+        logger.warning("Nebius extraction request failed: %s", error_name)  # nosemgrep
         raise ExtractionFailedError("Nebius Token Factory request failed.") from exc
 
     content = response.choices[0].message.content if response.choices else None

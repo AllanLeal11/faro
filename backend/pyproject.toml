@@ -10,7 +10,7 @@ dependencies = [
     "fastapi>=0.141.1",
     "uvicorn[standard]>=0.52.4",
     "pydantic-settings>=2.15.0",
-    "openai>=3.16.2",
+    "openai>=1.0.0",
 ]
 
 [dependency-groups]
@@ -26,6 +26,11 @@ dev = [
 # This is a service run with `uvicorn app.main:app`, not a library to be
 # built and published — skip packaging it.
 package = false
+# Wait 7 days before resolving a newly published package version: a
+# freshly published release is exactly when a compromised/malicious
+# package is most likely to still be live (semgrep:
+# uv-missing-dependency-cooldown). Requires uv >= 0.9.17.
+exclude-newer = "7 days"
 
 [tool.ruff]
 line-length = 100
