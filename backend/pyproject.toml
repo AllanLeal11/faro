@@ -10,6 +10,7 @@ dependencies = [
     "fastapi>=0.141.1",
     "uvicorn[standard]>=0.52.4",
     "pydantic-settings>=2.15.0",
+    "openai>=3.16.2",
 ]
 
 [dependency-groups]
