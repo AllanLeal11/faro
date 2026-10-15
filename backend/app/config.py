@@ -65,6 +65,13 @@ class Settings(BaseSettings):
     frontend_url: str = ""
     allowed_origins: str = ""
 
+    # --- MCP server (Streamable HTTP) ---
+    # Comma-separated allow-lists for the MCP transport's DNS-rebinding
+    # protection (CLAUDE.md 12.8). In production set these to the MCP server's
+    # public host/origin; in development they default to localhost.
+    mcp_allowed_hosts: str = ""
+    mcp_allowed_origins: str = ""
+
     @property
     def is_production(self) -> bool:
         return self.environment == "production"
@@ -76,6 +83,21 @@ class Settings(BaseSettings):
     @property
     def allowed_origins_list(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
+
+    @property
+    def mcp_allowed_hosts_list(self) -> list[str]:
+        configured = [h.strip() for h in self.mcp_allowed_hosts.split(",") if h.strip()]
+        if configured:
+            return configured
+        # Dev default: localhost on any port. Production must configure this.
+        return ["127.0.0.1", "127.0.0.1:*", "localhost", "localhost:*"]
+
+    @property
+    def mcp_allowed_origins_list(self) -> list[str]:
+        configured = [o.strip() for o in self.mcp_allowed_origins.split(",") if o.strip()]
+        if configured:
+            return configured
+        return ["http://localhost:5173", "http://127.0.0.1:5173"]
 
     @property
     def effective_database_url(self) -> str:
