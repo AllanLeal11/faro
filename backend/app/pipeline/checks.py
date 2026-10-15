@@ -289,9 +289,7 @@ def _iter_terms(folded: str, terms: tuple[str, ...]) -> list[str]:
     return [t for t in terms if t in folded]
 
 
-def run_checks(
-    message: str, trusted: list[TrustedEntity], language: str = "es"
-) -> ChecksOutput:
+def run_checks(message: str, trusted: list[TrustedEntity], language: str = "es") -> ChecksOutput:
     """Run every deterministic check and return evidence + a severity floor.
 
     Args:
@@ -374,8 +372,7 @@ def run_checks(
                 "hit",
                 f"La dirección {defang(host)} usa punycode, que puede esconder un "
                 "dominio imitador.",
-                f"The address {defang(host)} uses punycode, which can hide a "
-                "look-alike domain.",
+                f"The address {defang(host)} uses punycode, which can hide a look-alike domain.",
                 is_severe=True,
             )
         # Raw non-ASCII letters in a host (homoglyph attack).
@@ -410,10 +407,8 @@ def run_checks(
             add(
                 "url_shortener",
                 "hit",
-                f"El enlace usa un acortador ({defang(reg)}) que esconde el "
-                "destino real.",
-                f"The link uses a shortener ({defang(reg)}) that hides the real "
-                "destination.",
+                f"El enlace usa un acortador ({defang(reg)}) que esconde el destino real.",
+                f"The link uses a shortener ({defang(reg)}) that hides the real destination.",
             )
 
         # Look-alike of a trusted domain (edit distance on the deconfused form).
