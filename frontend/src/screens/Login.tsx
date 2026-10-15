@@ -3,6 +3,7 @@ import { ApiError } from "../lib/api";
 import { useAuth } from "../lib/auth";
 import { useI18n } from "../lib/i18n";
 import { BeaconMark } from "../components/icons";
+import { Footer } from "../components/Footer";
 
 const DEMO_EMAIL = "demo@faro.app";
 const DEMO_PASSWORD = "FaroDemo2026!";
@@ -130,6 +131,7 @@ export function Login() {
             </button>
           </div>
         </div>
+        <Footer />
       </main>
     </div>
   );

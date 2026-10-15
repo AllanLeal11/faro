@@ -8,6 +8,8 @@ import { Trusted } from "./screens/Trusted";
 import { Family } from "./screens/Family";
 import { Voice } from "./screens/Voice";
 import { HowItWorks } from "./screens/HowItWorks";
+import { Legal } from "./screens/Legal";
+import { Footer } from "./components/Footer";
 
 function TopBar() {
   const { s, lang, setLang } = useI18n();
@@ -47,11 +49,7 @@ function TopBar() {
   );
 }
 
-export function App() {
-  const { token } = useAuth();
-
-  if (!token) return <Login />;
-
+function AppShell() {
   return (
     <div className="app">
       <a className="skip-link" href="#main">
@@ -68,7 +66,21 @@ export function App() {
             <Route path="/how" element={<HowItWorks />} />
           </Routes>
         </div>
+        <Footer />
       </main>
     </div>
+  );
+}
+
+export function App() {
+  const { token } = useAuth();
+
+  // Legal pages are public — reachable with or without a session.
+  return (
+    <Routes>
+      <Route path="/privacy" element={<Legal kind="privacy" />} />
+      <Route path="/terms" element={<Legal kind="terms" />} />
+      <Route path="/*" element={token ? <AppShell /> : <Login />} />
+    </Routes>
   );
 }

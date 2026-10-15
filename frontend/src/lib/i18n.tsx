@@ -106,6 +106,13 @@ const ES = {
     title: "Cómo funciona Faro",
     lead: "Faro no adivina. Cada veredicto se apoya en evidencia que podés revisar.",
   },
+  footer: {
+    privacy: "Privacidad",
+    terms: "Términos",
+    back: "Volver",
+    madeBy: "Faro — un proyecto de Vértice Digital.",
+    noTracking: "Sin cookies de rastreo ni analíticas de terceros.",
+  },
 };
 
 const EN: typeof ES = {
@@ -203,6 +210,13 @@ const EN: typeof ES = {
   how: {
     title: "How Faro works",
     lead: "Faro doesn't guess. Every verdict rests on evidence you can review.",
+  },
+  footer: {
+    privacy: "Privacy",
+    terms: "Terms",
+    back: "Back",
+    madeBy: "Faro — a project by Vértice Digital.",
+    noTracking: "No tracking cookies or third-party analytics.",
   },
 };
 

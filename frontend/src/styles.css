@@ -570,3 +570,44 @@ a {
 .mt0 {
   margin-top: 0;
 }
+
+/* ---------- Site footer ---------- */
+.sitefoot {
+  border-top: 2px solid var(--line);
+  padding: 22px 0 32px;
+  margin-top: 48px;
+}
+
+.sitefoot__links {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+  margin-bottom: 6px;
+}
+
+.sitefoot__links a {
+  color: var(--night);
+  text-decoration: none;
+  font-weight: 700;
+}
+
+.sitefoot__links a:hover {
+  text-decoration: underline;
+}
+
+/* ---------- Legal pages ---------- */
+.legal {
+  padding: 32px 0 0;
+}
+
+.legal h2 {
+  margin-top: 28px;
+}
+
+.backlink {
+  display: inline-block;
+  margin-bottom: 8px;
+  color: var(--beacon-deep);
+  text-decoration: none;
+  font-weight: 700;
+}
