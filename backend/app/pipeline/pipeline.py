@@ -137,7 +137,7 @@ async def analyze(
     partial = False
 
     # 1. Deterministic checks — always run, never fail.
-    checks = run_checks(message, trusted)
+    checks = run_checks(message, trusted, language)
 
     # 2. Extract (LLM/mock).
     extraction = await extract(message, client, settings.model_extract)

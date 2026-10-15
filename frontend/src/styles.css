@@ -1,0 +1,572 @@
+/* Faro design system.
+   Concept: a lighthouse — a steady light that guides people through the fog of
+   scams. Built for everyday people and older adults: large type, high
+   contrast, unmistakable risk signals that never rely on color alone.
+   One accent (beacon amber) carries the personality; risk colors are reserved
+   strictly for risk. */
+
+:root {
+  /* Core palette */
+  --night: #0b1b2b; /* deep navy — text and dark panels */
+  --night-2: #12293d; /* raised navy surface */
+  --beacon: #f5a623; /* the lighthouse light — primary action */
+  --beacon-deep: #d9880f; /* beacon pressed/hover */
+  --paper: #fbfaf7; /* warm white — page */
+  --paper-2: #f2efe8; /* subtle raised paper */
+  --ink-soft: #46586a; /* secondary text on paper */
+  --line: #e2ddd2; /* hairlines on paper */
+
+  /* Risk — chosen for contrast with their text color */
+  --safe: #1b7f5e;
+  --safe-tint: #e5f2ec;
+  --caution: #b9701a;
+  --caution-tint: #f8ecd9;
+  --danger: #c0392b;
+  --danger-tint: #f8e3e0;
+
+  --radius: 14px;
+  --radius-sm: 9px;
+  --shadow: 0 10px 30px rgba(11, 27, 43, 0.12);
+  --maxw: 880px;
+
+  --font: "Atkinson Hyperlegible", system-ui, -apple-system, sans-serif;
+
+  color-scheme: light;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+}
+
+body {
+  margin: 0;
+  background: var(--paper);
+  color: var(--night);
+  font-family: var(--font);
+  font-size: 1.15rem; /* generous base for readability */
+  line-height: 1.6;
+  -webkit-font-smoothing: antialiased;
+}
+
+h1,
+h2,
+h3 {
+  line-height: 1.15;
+  margin: 0 0 0.5em;
+  font-weight: 700;
+  letter-spacing: -0.01em;
+}
+
+h1 {
+  font-size: clamp(2rem, 5vw, 2.9rem);
+}
+h2 {
+  font-size: clamp(1.5rem, 3.5vw, 2rem);
+}
+h3 {
+  font-size: 1.3rem;
+}
+
+p {
+  margin: 0 0 1rem;
+  max-width: 68ch;
+}
+
+a {
+  color: var(--beacon-deep);
+}
+
+/* Visible keyboard focus everywhere */
+:focus-visible {
+  outline: 3px solid var(--beacon);
+  outline-offset: 2px;
+  border-radius: 4px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  * {
+    animation: none !important;
+    transition: none !important;
+  }
+}
+
+/* ---------- Layout ---------- */
+.app {
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+.wrap {
+  width: 100%;
+  max-width: var(--maxw);
+  margin: 0 auto;
+  padding: 0 20px;
+}
+
+.main {
+  flex: 1;
+  padding: 32px 0 80px;
+}
+
+/* ---------- Top bar ---------- */
+.topbar {
+  background: var(--night);
+  color: var(--paper);
+}
+
+.topbar__inner {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 14px 20px;
+  max-width: var(--maxw);
+  margin: 0 auto;
+}
+
+.brand {
+  display: inline-flex;
+  align-items: center;
+  gap: 12px;
+  font-weight: 700;
+  font-size: 1.3rem;
+  color: var(--paper);
+  text-decoration: none;
+}
+
+.brand__beam {
+  flex: none;
+}
+
+.nav {
+  display: flex;
+  gap: 6px;
+  flex-wrap: wrap;
+}
+
+.nav a {
+  color: var(--paper);
+  text-decoration: none;
+  padding: 9px 14px;
+  border-radius: var(--radius-sm);
+  font-size: 1.02rem;
+}
+
+.nav a:hover {
+  background: var(--night-2);
+}
+
+.nav a.active {
+  background: var(--beacon);
+  color: var(--night);
+  font-weight: 700;
+}
+
+/* ---------- Hero (the message check is the hero) ---------- */
+.beacon-panel {
+  position: relative;
+  overflow: hidden;
+  background: var(--night);
+  color: var(--paper);
+  border-radius: var(--radius);
+  padding: 40px 28px 32px;
+  box-shadow: var(--shadow);
+}
+
+.beacon-panel::before {
+  /* The lighthouse light — one deliberate flourish, used once. */
+  content: "";
+  position: absolute;
+  top: -120px;
+  right: -60px;
+  width: 360px;
+  height: 360px;
+  background: radial-gradient(
+    circle,
+    rgba(245, 166, 35, 0.33),
+    rgba(245, 166, 35, 0) 70%
+  );
+  pointer-events: none;
+}
+
+.beacon-panel h1,
+.beacon-panel p {
+  position: relative;
+}
+
+.beacon-panel p {
+  color: #d4dde6;
+  font-size: 1.2rem;
+}
+
+/* ---------- Forms ---------- */
+.field {
+  display: block;
+  margin-bottom: 18px;
+}
+
+.field > label {
+  display: block;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.input,
+.textarea,
+.select {
+  width: 100%;
+  font: inherit;
+  color: var(--night);
+  background: var(--paper);
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  padding: 13px 14px;
+}
+
+.input:focus,
+.textarea:focus,
+.select:focus {
+  border-color: var(--beacon);
+  outline: none;
+}
+
+.textarea {
+  min-height: 150px;
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.hint {
+  color: var(--ink-soft);
+  font-size: 0.98rem;
+  margin-top: 6px;
+}
+
+/* ---------- Buttons ---------- */
+.btn {
+  font: inherit;
+  font-weight: 700;
+  cursor: pointer;
+  border: 2px solid transparent;
+  border-radius: var(--radius-sm);
+  padding: 13px 22px;
+  background: var(--beacon);
+  color: var(--night);
+  transition: background 0.15s ease;
+}
+
+.btn:hover {
+  background: var(--beacon-deep);
+}
+
+.btn:disabled {
+  opacity: 0.55;
+  cursor: progress;
+}
+
+.btn--big {
+  font-size: 1.2rem;
+  padding: 16px 28px;
+  width: 100%;
+}
+
+.btn--ghost {
+  background: transparent;
+  color: var(--night);
+  border-color: var(--night);
+}
+
+.btn--ghost:hover {
+  background: var(--night);
+  color: var(--paper);
+}
+
+.btn--quiet {
+  background: transparent;
+  color: var(--beacon-deep);
+  border-color: var(--line);
+}
+
+.btn--quiet:hover {
+  background: var(--paper-2);
+}
+
+.btn-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  align-items: center;
+}
+
+/* ---------- Risk verdict ---------- */
+.verdict {
+  border-radius: var(--radius);
+  overflow: hidden;
+  border: 2px solid var(--line);
+  margin-top: 24px;
+  background: var(--paper);
+  box-shadow: var(--shadow);
+}
+
+.verdict__banner {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  padding: 22px 24px;
+  color: #fff;
+}
+
+.verdict__word {
+  font-size: clamp(1.7rem, 5vw, 2.3rem);
+  font-weight: 700;
+  letter-spacing: 0.01em;
+  line-height: 1;
+}
+
+.verdict__sub {
+  font-size: 1.05rem;
+  opacity: 0.95;
+}
+
+.verdict--high .verdict__banner {
+  background: var(--danger);
+}
+.verdict--medium .verdict__banner {
+  background: var(--caution);
+}
+.verdict--low .verdict__banner {
+  background: var(--safe);
+}
+
+.verdict__body {
+  padding: 22px 24px;
+}
+
+.verdict__action {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 16px 20px;
+  border-radius: var(--radius-sm);
+  margin: 4px 0 18px;
+  font-size: 1.1rem;
+}
+
+.verdict--high .verdict__action {
+  background: var(--danger-tint);
+}
+.verdict--medium .verdict__action {
+  background: var(--caution-tint);
+}
+.verdict--low .verdict__action {
+  background: var(--safe-tint);
+}
+
+.partial-note {
+  font-size: 0.95rem;
+  color: var(--ink-soft);
+  border-top: 1px dashed var(--line);
+  padding-top: 12px;
+  margin-top: 12px;
+}
+
+/* ---------- Evidence ---------- */
+.evidence {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 10px;
+}
+
+.evidence li {
+  display: flex;
+  gap: 12px;
+  align-items: flex-start;
+  padding: 12px 14px;
+  background: var(--paper-2);
+  border-radius: var(--radius-sm);
+  border-left: 5px solid var(--ink-soft);
+}
+
+.evidence li.sev {
+  border-left-color: var(--danger);
+}
+
+.evidence__dot {
+  flex: none;
+  margin-top: 4px;
+}
+
+.evidence__text {
+  font-size: 1.02rem;
+}
+
+.evidence__src a {
+  font-size: 0.95rem;
+}
+
+/* ---------- Generic sections / lists ---------- */
+.section {
+  margin-top: 32px;
+}
+
+.lead {
+  font-size: 1.25rem;
+  color: var(--ink-soft);
+}
+
+.record {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: flex-start;
+  padding: 16px 18px;
+  border: 2px solid var(--line);
+  border-radius: var(--radius-sm);
+  margin-bottom: 12px;
+  background: var(--paper);
+}
+
+.record__title {
+  font-weight: 700;
+}
+
+.record__meta {
+  color: var(--ink-soft);
+  font-size: 1rem;
+}
+
+.tag {
+  display: inline-block;
+  font-size: 0.9rem;
+  font-weight: 700;
+  padding: 3px 10px;
+  border-radius: 999px;
+  background: var(--night);
+  color: var(--paper);
+  margin-right: 8px;
+}
+
+.card {
+  background: var(--paper);
+  border: 2px solid var(--line);
+  border-radius: var(--radius);
+  padding: 24px;
+}
+
+.grid-2 {
+  display: grid;
+  gap: 12px;
+  grid-template-columns: 1fr 1fr;
+}
+
+@media (max-width: 560px) {
+  .grid-2 {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ---------- Voice (Alexa+ simulation) ---------- */
+.voice-stage {
+  text-align: center;
+  padding: 10px 0 20px;
+}
+
+.mic {
+  width: 128px;
+  height: 128px;
+  border-radius: 50%;
+  border: none;
+  background: var(--beacon);
+  color: var(--night);
+  cursor: pointer;
+  box-shadow: var(--shadow);
+}
+
+.mic.listening {
+  animation: pulse 1.4s ease-in-out infinite;
+}
+
+@keyframes pulse {
+  0%,
+  100% {
+    box-shadow: 0 0 0 0 rgba(245, 166, 35, 0.5);
+  }
+  50% {
+    box-shadow: 0 0 0 22px rgba(245, 166, 35, 0);
+  }
+}
+
+.transcript {
+  font-size: 1.2rem;
+  margin: 18px auto;
+  max-width: 60ch;
+  min-height: 1.6em;
+}
+
+/* ---------- Banners / alerts ---------- */
+.flash {
+  padding: 13px 16px;
+  border-radius: var(--radius-sm);
+  margin-bottom: 16px;
+  font-weight: 700;
+}
+
+.flash--error {
+  background: var(--danger-tint);
+  color: var(--danger);
+}
+
+.flash--ok {
+  background: var(--safe-tint);
+  color: var(--safe);
+}
+
+/* ---------- Auth ---------- */
+.auth {
+  max-width: 440px;
+  margin: 6vh auto 0;
+}
+
+.center-narrow {
+  max-width: 560px;
+}
+
+.langtoggle {
+  background: transparent;
+  border: 2px solid rgba(251, 250, 247, 0.4);
+  color: var(--paper);
+  border-radius: 999px;
+  padding: 6px 14px;
+  font: inherit;
+  font-size: 0.95rem;
+  cursor: pointer;
+}
+
+.skip-link {
+  position: absolute;
+  left: -9999px;
+}
+.skip-link:focus {
+  position: static;
+  display: inline-block;
+  padding: 8px 14px;
+  background: var(--beacon);
+  color: var(--night);
+}
+
+.muted {
+  color: var(--ink-soft);
+}
+.stack > * + * {
+  margin-top: 14px;
+}
+.mt0 {
+  margin-top: 0;
+}

@@ -289,12 +289,16 @@ def _iter_terms(folded: str, terms: tuple[str, ...]) -> list[str]:
     return [t for t in terms if t in folded]
 
 
-def run_checks(message: str, trusted: list[TrustedEntity]) -> ChecksOutput:
+def run_checks(
+    message: str, trusted: list[TrustedEntity], language: str = "es"
+) -> ChecksOutput:
     """Run every deterministic check and return evidence + a severity floor.
 
     Args:
         message: the raw suspicious text (as pasted by the user).
         trusted: the user's trusted circle (banks, companies, contacts).
+        language: "es" or "en" — the language of the human-readable evidence
+            detail shown to the user. The machine-stable `type` is unaffected.
 
     Returns:
         ChecksOutput with evidence items, a `severe_hit` flag, and the
@@ -302,6 +306,7 @@ def run_checks(message: str, trusted: list[TrustedEntity]) -> ChecksOutput:
     """
     norm = normalize(message)
     folded = _fold(norm)
+    is_es = language.lower().startswith("es")
     evidence: list[EvidenceItem] = []
     severe = False
     counter = 0
@@ -309,7 +314,8 @@ def run_checks(message: str, trusted: list[TrustedEntity]) -> ChecksOutput:
     def add(
         type_: str,
         result: str,
-        detail: str,
+        es: str,
+        en: str,
         *,
         is_severe: bool = False,
         source_url: str | None = None,
@@ -322,7 +328,7 @@ def run_checks(message: str, trusted: list[TrustedEntity]) -> ChecksOutput:
                 kind="check",
                 type=type_,
                 result=result,
-                detail=detail,
+                detail=es if is_es else en,
                 source_url=source_url,
                 severe=is_severe,
             )
@@ -351,6 +357,8 @@ def run_checks(message: str, trusted: list[TrustedEntity]) -> ChecksOutput:
         add(
             "bidi_trick",
             "hit",
+            "El mensaje esconde caracteres invisibles o cambia la dirección del "
+            "texto, un truco para disfrazar enlaces o remitentes.",
             "The message hides text direction or invisible characters, a "
             "technique used to disguise links or senders.",
         )
@@ -364,7 +372,10 @@ def run_checks(message: str, trusted: list[TrustedEntity]) -> ChecksOutput:
             add(
                 "punycode_domain",
                 "hit",
-                f"The address {defang(host)} uses punycode, which can hide a look-alike domain.",
+                f"La dirección {defang(host)} usa punycode, que puede esconder un "
+                "dominio imitador.",
+                f"The address {defang(host)} uses punycode, which can hide a "
+                "look-alike domain.",
                 is_severe=True,
             )
         # Raw non-ASCII letters in a host (homoglyph attack).
@@ -373,6 +384,8 @@ def run_checks(message: str, trusted: list[TrustedEntity]) -> ChecksOutput:
             add(
                 "homoglyph_domain",
                 "hit",
+                f"La dirección {defang(host)} mezcla caracteres de otro alfabeto "
+                f"que se parecen a los normales (se lee como {defang(ascii_form)}).",
                 f"The address {defang(host)} mixes look-alike characters from "
                 f"another alphabet (reads like {defang(ascii_form)}).",
                 is_severe=True,
@@ -384,6 +397,8 @@ def run_checks(message: str, trusted: list[TrustedEntity]) -> ChecksOutput:
             add(
                 "ip_url",
                 "hit",
+                f"El enlace apunta a una dirección IP ({defang(host)}) en vez de "
+                "un sitio con nombre — los bancos de verdad no hacen esto.",
                 f"The link points to a raw IP address ({defang(host)}) instead "
                 "of a named website — legitimate banks don't do this.",
             )
@@ -395,7 +410,10 @@ def run_checks(message: str, trusted: list[TrustedEntity]) -> ChecksOutput:
             add(
                 "url_shortener",
                 "hit",
-                f"The link uses a shortener ({defang(reg)}) that hides the real destination.",
+                f"El enlace usa un acortador ({defang(reg)}) que esconde el "
+                "destino real.",
+                f"The link uses a shortener ({defang(reg)}) that hides the real "
+                "destination.",
             )
 
         # Look-alike of a trusted domain (edit distance on the deconfused form).
@@ -405,12 +423,15 @@ def run_checks(message: str, trusted: list[TrustedEntity]) -> ChecksOutput:
                 continue
             dist = _levenshtein(deconfused_reg, td, cap=2)
             if 0 < dist <= 2:
+                plural_es = "es" if dist != 1 else ""
+                plural_en = "s" if dist != 1 else ""
                 add(
                     "lookalike_domain",
                     "hit",
+                    f"La dirección {defang(reg)} es casi idéntica a tu sitio de "
+                    f"confianza {defang(td)} (cambia {dist} letra{plural_es}).",
                     f"The address {defang(reg)} is a near-copy of your trusted "
-                    f"site {defang(td)} (off by {dist} character"
-                    f"{'s' if dist != 1 else ''}).",
+                    f"site {defang(td)} (off by {dist} character{plural_en}).",
                     is_severe=True,
                 )
                 break
@@ -419,11 +440,14 @@ def run_checks(message: str, trusted: list[TrustedEntity]) -> ChecksOutput:
         host_tokens = set(_fold(reg).replace(".", " ").replace("-", " ").split())
         shared = host_tokens & trusted_brand_tokens
         if shared and reg not in trusted_domains:
+            brand = ", ".join(sorted(shared))
             add(
                 "sender_mismatch",
                 "hit",
+                f"La dirección {defang(reg)} usa el nombre de una marca de tu "
+                f"confianza ({brand}) pero no es su sitio oficial.",
                 f"The address {defang(reg)} uses your trusted brand name "
-                f"({', '.join(sorted(shared))}) but is not its official site.",
+                f"({brand}) but is not its official site.",
                 is_severe=True,
             )
 
@@ -432,6 +456,8 @@ def run_checks(message: str, trusted: list[TrustedEntity]) -> ChecksOutput:
         add(
             "otp_request",
             "hit",
+            "El mensaje pide un código de verificación o de un solo uso. Los "
+            "bancos de verdad nunca te piden compartirlos.",
             "The message asks for a one-time / verification code. Real banks "
             "never ask you to share these.",
             is_severe=True,
@@ -440,6 +466,7 @@ def run_checks(message: str, trusted: list[TrustedEntity]) -> ChecksOutput:
         add(
             "credential_request",
             "hit",
+            "El mensaje pide contraseñas, números de tarjeta o datos de la cuenta.",
             "The message asks for passwords, card numbers or account details.",
             is_severe=True,
         )
@@ -447,6 +474,8 @@ def run_checks(message: str, trusted: list[TrustedEntity]) -> ChecksOutput:
         add(
             "giftcard_or_crypto",
             "hit",
+            "El mensaje empuja a pagar con tarjetas de regalo, cripto o una "
+            "transferencia urgente — una señal típica de estafa.",
             "The message pushes payment via gift cards, crypto or an urgent "
             "transfer — a hallmark of scams.",
             is_severe=True,
@@ -456,6 +485,7 @@ def run_checks(message: str, trusted: list[TrustedEntity]) -> ChecksOutput:
         add(
             "urgency_pressure",
             "hit",
+            "El mensaje usa presión y urgencia para apurarte a actuar.",
             "The message uses pressure and urgency to rush you into acting.",
         )
 

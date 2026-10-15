@@ -247,3 +247,12 @@ $RECYCLE.BIN/
 .vscode/*
 !.vscode/extensions.json
 .idea/
+
+# Local dev databases
+*.db
+faro.db
+
+# Frontend source — the Python template ignores lib/, but this is app code
+!frontend/src/lib/
+!frontend/src/lib/**
+*.tsbuildinfo
