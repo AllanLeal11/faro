@@ -5,6 +5,8 @@ CLAUDE.md section 12.10: no error tracebacks to the client, DEBUG off,
 """
 
 import logging
+from collections.abc import AsyncIterator
+from contextlib import asynccontextmanager
 
 from fastapi import FastAPI, Request
 from fastapi.exceptions import RequestValidationError
@@ -12,6 +14,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from starlette.exceptions import HTTPException as StarletteHTTPException
 
+from app.api import alert, auth, check, family, trusted
 from app.config import get_settings
 from app.middleware.security import BodySizeLimitMiddleware, SecurityHeadersMiddleware
 
@@ -20,8 +23,28 @@ logger = logging.getLogger("faro")
 settings = get_settings()
 _is_dev = settings.environment == "development"
 
+# In development, allow the Vite dev server by default so the frontend works
+# with no extra config. Production uses the explicit ALLOWED_ORIGINS list.
+_dev_origins = ["http://localhost:5173", "http://127.0.0.1:5173"]
+_cors_origins = settings.allowed_origins_list or (_dev_origins if _is_dev else [])
+
+
+@asynccontextmanager
+async def lifespan(app: FastAPI) -> AsyncIterator[None]:
+    # Create tables and (re)seed the demo account on startup. For the
+    # hackathon demo the schema is created at boot; production would use
+    # Alembic migrations instead.
+    from app.db.base import init_db
+    from app.db.seed import ensure_demo_account
+
+    await init_db()
+    await ensure_demo_account()
+    yield
+
+
 app = FastAPI(
     title="Faro API",
+    lifespan=lifespan,
     # /docs and /openapi.json only exist in development; in every other
     # environment FastAPI serves neither, so there is nothing to protect.
     docs_url="/docs" if _is_dev else None,
@@ -36,7 +59,7 @@ app = FastAPI(
 # both achieved by adding them last.
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=settings.allowed_origins_list,
+    allow_origins=_cors_origins,
     allow_credentials=False,  # never combine "*" origins with credentials
     allow_methods=["GET", "POST", "PUT", "DELETE"],
     allow_headers=["Content-Type", "Authorization", "X-CSRF-Token"],
@@ -77,3 +100,11 @@ async def unhandled_exception_handler(request: Request, exc: Exception):
 async def health() -> dict:
     # Deliberately minimal: no version, no build info, no config echo.
     return {"status": "ok"}
+
+
+# Routes. Each router carries its own /api prefix.
+app.include_router(auth.router)
+app.include_router(check.router)
+app.include_router(trusted.router)
+app.include_router(family.router)
+app.include_router(alert.router)

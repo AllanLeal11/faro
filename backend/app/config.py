@@ -77,6 +77,24 @@ class Settings(BaseSettings):
     def allowed_origins_list(self) -> list[str]:
         return [o.strip() for o in self.allowed_origins.split(",") if o.strip()]
 
+    @property
+    def effective_database_url(self) -> str:
+        """The async SQLAlchemy URL to connect with.
+
+        In production DATABASE_URL is required (validated below). In
+        development, an empty value falls back to a local SQLite file so the
+        app runs with no external database. A plain `postgresql://` URL (as
+        Railway provides) is normalized to the asyncpg driver.
+        """
+        url = self.database_url.strip()
+        if not url:
+            return "sqlite+aiosqlite:///./faro.db"
+        if url.startswith("postgresql://"):
+            return url.replace("postgresql://", "postgresql+asyncpg://", 1)
+        if url.startswith("postgres://"):
+            return url.replace("postgres://", "postgresql+asyncpg://", 1)
+        return url
+
     @model_validator(mode="after")
     def _fail_closed_in_production(self) -> "Settings":
         """Refuse to start in production with an insecure or incomplete config.
