@@ -1,0 +1,28 @@
+{"text": "BAC: su cuenta sera bloqueada hoy. Confirme su codigo de verificacion 884120 en https://baccredomatlc.com/login", "label": "scam", "note": "lookalike domain + OTP + urgency"}
+{"text": "Felicidades! Usted gano un premio de Walmart. Reclame pagando una gift card de iTunes al 8888-0000.", "label": "scam", "note": "prize + gift card"}
+{"text": "SINPE: transferencia pendiente. Ingrese a http://190.0.0.5/sinpe para liberar sus fondos ahora.", "label": "scam", "note": "IP URL + urgency"}
+{"text": "Su paquete de Correos no pudo entregarse. Pague 1.200 colones aqui: https://bit.ly/3xcorreos", "label": "scam", "note": "shortener"}
+{"text": "Hola, soy del soporte de Microsoft. Instale esta app para arreglar su computadora y comparta el codigo que le aparece.", "label": "scam", "note": "install app + share code"}
+{"text": "Banco Nacional: detectamos un cargo. Para cancelarlo responda con su numero de tarjeta y CVV.", "label": "scam", "note": "credential request"}
+{"text": "URGENTE: su cuenta de WhatsApp se cerrara. Verifique con el codigo que le enviamos por SMS.", "label": "scam", "note": "OTP + urgency"}
+{"text": "Inversion garantizada en cripto, duplique su dinero en 24 horas. Deposite a esta billetera USDT.", "label": "scam", "note": "crypto"}
+{"text": "Su factura de Kolbi esta vencida. Evite el corte pagando de inmediato en kolbl-cr.com", "label": "scam", "note": "lookalike + urgency"}
+{"text": "Mamá, cambié de numero. Necesito que me hagas un SINPE urgente a este numero, luego te explico.", "label": "scam", "note": "family impersonation + urgency"}
+{"text": "Your Netflix payment failed. Update your card now at http://netfllx-billing.com to avoid suspension.", "label": "scam", "note": "lookalike + urgency"}
+{"text": "Dear user, verify your account by sending your password and one-time code to confirm your identity.", "label": "scam", "note": "credential + OTP"}
+{"text": "Hola tía, feliz cumpleaños! Nos vemos el domingo en el almuerzo familiar. Un abrazo.", "label": "legit", "note": "normal family"}
+{"text": "Recordatorio: su cita en la clinica es manana a las 10 am. Si no puede asistir, llame al numero de su carne.", "label": "legit", "note": "appointment, no code"}
+{"text": "Gracias por su compra en la libreria. Su pedido estara listo para recoger el jueves.", "label": "legit", "note": "normal order"}
+{"text": "El partido se pasa para el sabado por la lluvia. Avisen a los demas del equipo.", "label": "legit", "note": "normal chat"}
+{"text": "Buenas, le confirmo la reunion del lunes a las 3 pm en la oficina. Saludos.", "label": "legit", "note": "normal work"}
+{"text": "Tu paquete fue entregado en la recepcion del edificio. Que tengas buen dia.", "label": "legit", "note": "normal delivery"}
+{"text": "Hi, just checking in about dinner on Friday. Does 7pm still work for you?", "label": "legit", "note": "normal chat"}
+{"text": "Your library books are due next week. You can renew them online with your card.", "label": "legit", "note": "normal reminder"}
+{"text": "Recordatorio de la farmacia: puede retirar su pedido cuando guste en el horario normal.", "label": "legit", "note": "pharmacy pickup, no condition named"}
+{"text": "Profe, le escribo para avisar que no podre asistir a la clase de hoy. Gracias.", "label": "legit", "note": "normal message"}
+{"text": "La factura del agua ya esta disponible en la plataforma oficial de AyA. Puede consultarla cuando quiera.", "label": "legit", "note": "normal, no pressure"}
+{"text": "Nos llego la invitacion a la boda. Confirmamos asistencia para los dos. Que alegria!", "label": "legit", "note": "normal chat"}
+{"text": "Le confirmo su reserva en el restaurante. Su codigo de reserva es 48213. Lo esperamos el viernes a las 7 pm.", "label": "legit", "note": "hard negative: benign code"}
+{"text": "Aqui estan las fotos de la fiesta: https://photos.google.com/share/album-xyz. Descarguen las que quieran.", "label": "legit", "note": "hard negative: legit https link"}
+{"text": "El informe quedo listo. Lo pueden ver en https://docs.google.com/document/d/abc. Cualquier duda me avisan.", "label": "legit", "note": "hard negative: legit https link"}
+{"text": "Su numero de orden es 90231. El pedido llega entre el lunes y el martes por correo normal.", "label": "legit", "note": "hard negative: benign order number"}
