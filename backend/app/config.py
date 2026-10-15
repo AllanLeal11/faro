@@ -3,12 +3,21 @@
 Reads every variable from .env.example (see CLAUDE.md section 8) via
 pydantic-settings. Fails closed: in production, a missing secret or a
 misconfigured ALLOWED_ORIGINS refuses to start rather than run insecurely.
+
+LLM provider: the analysis pipeline talks to a provider-agnostic client
+(see app/services/llm.py). The default is AWS Bedrock, which also covers the
+Amazon "AWS Builder" mini challenge. The `nebius` option is retained so the
+same codebase can target the Nebius hackathon without edits — only env vars
+change.
 """
 
 from functools import lru_cache
+from typing import Literal
 
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
+
+LLMProvider = Literal["bedrock", "nebius"]
 
 
 class Settings(BaseSettings):
@@ -22,13 +31,28 @@ class Settings(BaseSettings):
     mock_mode: bool = True
     environment: str = "development"
 
-    # --- Nebius Token Factory ---
-    nebius_api_key: str = ""
-    nebius_base_url: str = ""
+    # --- LLM provider selection ---
+    llm_provider: LLMProvider = "bedrock"
+    # Model ids / inference-profile ids for the two pipeline stages. For
+    # Bedrock these come from the user's Bedrock console (e.g. a Nova or
+    # Claude inference profile); for Nebius they are Nemotron model ids.
     model_extract: str = ""
     model_verdict: str = ""
 
-    # --- Tavily ---
+    # --- AWS (Bedrock + SES share these credentials) ---
+    aws_region: str = ""
+    aws_access_key_id: str = ""
+    aws_secret_access_key: str = ""
+    # Bedrock may live in a different region than SES; defaults to aws_region.
+    bedrock_region: str = ""
+    ses_from_email: str = ""
+
+    # --- Nebius Token Factory (only used when llm_provider == "nebius") ---
+    nebius_api_key: str = ""
+    nebius_base_url: str = ""
+
+    # --- Tavily (optional evidence search) ---
+    # When empty, the evidence stage is skipped and results are marked partial.
     tavily_api_key: str = ""
 
     # --- Database ---
@@ -37,12 +61,6 @@ class Settings(BaseSettings):
     # --- Auth ---
     jwt_secret: str = ""
 
-    # --- Amazon SES ---
-    aws_region: str = ""
-    aws_access_key_id: str = ""
-    aws_secret_access_key: str = ""
-    ses_from_email: str = ""
-
     # --- Web / CORS ---
     frontend_url: str = ""
     allowed_origins: str = ""
@@ -50,6 +68,10 @@ class Settings(BaseSettings):
     @property
     def is_production(self) -> bool:
         return self.environment == "production"
+
+    @property
+    def effective_bedrock_region(self) -> str:
+        return self.bedrock_region or self.aws_region
 
     @property
     def allowed_origins_list(self) -> list[str]:
@@ -74,20 +96,26 @@ class Settings(BaseSettings):
         if "*" in self.allowed_origins_list:
             raise ValueError("ALLOWED_ORIGINS must not contain '*' in production.")
 
-        required = {
-            "NEBIUS_API_KEY": self.nebius_api_key,
-            "NEBIUS_BASE_URL": self.nebius_base_url,
+        # Always required in production, regardless of LLM provider.
+        required: dict[str, str] = {
             "MODEL_EXTRACT": self.model_extract,
             "MODEL_VERDICT": self.model_verdict,
-            "TAVILY_API_KEY": self.tavily_api_key,
             "DATABASE_URL": self.database_url,
             "JWT_SECRET": self.jwt_secret,
+            "SES_FROM_EMAIL": self.ses_from_email,
+            "FRONTEND_URL": self.frontend_url,
+            # SES needs AWS credentials even when the LLM provider is Nebius.
             "AWS_REGION": self.aws_region,
             "AWS_ACCESS_KEY_ID": self.aws_access_key_id,
             "AWS_SECRET_ACCESS_KEY": self.aws_secret_access_key,
-            "SES_FROM_EMAIL": self.ses_from_email,
-            "FRONTEND_URL": self.frontend_url,
         }
+
+        # Provider-specific requirements.
+        if self.llm_provider == "nebius":
+            required["NEBIUS_API_KEY"] = self.nebius_api_key
+            required["NEBIUS_BASE_URL"] = self.nebius_base_url
+        # Bedrock reuses the AWS credentials already required above.
+
         missing = [name for name, value in required.items() if not value]
         if missing:
             raise ValueError(
