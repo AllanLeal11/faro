@@ -10,11 +10,14 @@ dependencies = [
     "fastapi>=0.141.1",
     "uvicorn[standard]>=0.52.4",
     "pydantic-settings>=2.15.0",
+    "boto3>=1.40.0",
+    "httpx>=0.28.0",
 ]
 
 [dependency-groups]
 dev = [
     "pytest>=8.4.0",
+    "pytest-asyncio>=1.0.0",
     "httpx>=0.28.0",
     "ruff>=0.16.7",
     "bandit>=1.9.4",
@@ -39,3 +42,4 @@ ignore = []
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
+asyncio_mode = "auto"
