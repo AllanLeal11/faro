@@ -5,10 +5,16 @@ pydantic-settings. Fails closed: in production, a missing secret or a
 misconfigured ALLOWED_ORIGINS refuses to start rather than run insecurely.
 
 LLM provider: the analysis pipeline talks to a provider-agnostic client
-(see app/services/llm.py). The default is AWS Bedrock, which also covers the
-Amazon "AWS Builder" mini challenge. The `nebius` option is retained so the
-same codebase can target the Nebius hackathon without edits — only env vars
-change.
+(see app/services/llm.py). Options:
+- `bedrock` — AWS Bedrock Converse (also covers the AWS Builder mini
+  challenge); needs AWS credentials.
+- `google` — Google Gemini via its OpenAI-compatible endpoint; needs only a
+  free Gemini API key (no AWS, no card). Used for the zero-cost deployment.
+- `nebius` — OpenAI-compatible Token Factory, for the Nebius hackathon.
+
+SES (family-alert email) is optional: when AWS credentials and a verified
+sender are not configured, the alert is simulated (logged, reported sent) so
+the feature still demos without AWS.
 """
 
 from functools import lru_cache
@@ -17,7 +23,7 @@ from typing import Literal
 from pydantic import model_validator
 from pydantic_settings import BaseSettings, SettingsConfigDict
 
-LLMProvider = Literal["bedrock", "nebius"]
+LLMProvider = Literal["bedrock", "google", "nebius"]
 
 
 class Settings(BaseSettings):
@@ -46,6 +52,10 @@ class Settings(BaseSettings):
     # Bedrock may live in a different region than SES; defaults to aws_region.
     bedrock_region: str = ""
     ses_from_email: str = ""
+
+    # --- Google Gemini (only used when llm_provider == "google") ---
+    # A free API key from Google AI Studio (no AWS, no card).
+    google_api_key: str = ""
 
     # --- Nebius Token Factory (only used when llm_provider == "nebius") ---
     nebius_api_key: str = ""
@@ -79,6 +89,16 @@ class Settings(BaseSettings):
     @property
     def effective_bedrock_region(self) -> str:
         return self.bedrock_region or self.aws_region
+
+    @property
+    def ses_configured(self) -> bool:
+        """True only when SES can actually send (creds + verified sender)."""
+        return bool(
+            self.aws_access_key_id
+            and self.aws_secret_access_key
+            and self.aws_region
+            and self.ses_from_email
+        )
 
     @property
     def allowed_origins_list(self) -> list[str]:
@@ -137,24 +157,34 @@ class Settings(BaseSettings):
             raise ValueError("ALLOWED_ORIGINS must not contain '*' in production.")
 
         # Always required in production, regardless of LLM provider.
+        # DATABASE_URL is intentionally optional: without it the app uses a
+        # local SQLite file, which is fine for the free demo (the schema is
+        # recreated and the demo account re-seeded on startup).
         required: dict[str, str] = {
             "MODEL_EXTRACT": self.model_extract,
             "MODEL_VERDICT": self.model_verdict,
-            "DATABASE_URL": self.database_url,
             "JWT_SECRET": self.jwt_secret,
-            "SES_FROM_EMAIL": self.ses_from_email,
             "FRONTEND_URL": self.frontend_url,
-            # SES needs AWS credentials even when the LLM provider is Nebius.
-            "AWS_REGION": self.aws_region,
-            "AWS_ACCESS_KEY_ID": self.aws_access_key_id,
-            "AWS_SECRET_ACCESS_KEY": self.aws_secret_access_key,
         }
 
         # Provider-specific requirements.
-        if self.llm_provider == "nebius":
+        if self.llm_provider == "bedrock":
+            required["AWS_ACCESS_KEY_ID"] = self.aws_access_key_id
+            required["AWS_SECRET_ACCESS_KEY"] = self.aws_secret_access_key
+            required["AWS_REGION"] = self.aws_region
+        elif self.llm_provider == "google":
+            required["GOOGLE_API_KEY"] = self.google_api_key
+        elif self.llm_provider == "nebius":
             required["NEBIUS_API_KEY"] = self.nebius_api_key
             required["NEBIUS_BASE_URL"] = self.nebius_base_url
-        # Bedrock reuses the AWS credentials already required above.
+
+        # SES is optional. If a sender is set, require full credentials so a
+        # half-configured SES doesn't silently fail; if none is set, alerts
+        # are simulated (see services/ses.py).
+        if self.ses_from_email:
+            required["AWS_ACCESS_KEY_ID"] = self.aws_access_key_id
+            required["AWS_SECRET_ACCESS_KEY"] = self.aws_secret_access_key
+            required["AWS_REGION"] = self.aws_region
 
         missing = [name for name, value in required.items() if not value]
         if missing:

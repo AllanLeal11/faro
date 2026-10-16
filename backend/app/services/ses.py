@@ -128,7 +128,9 @@ async def send_family_alert(
 ) -> bool:
     """Send a family alert email. Returns True on success, False on failure.
 
-    In MOCK_MODE nothing is sent; the call is logged and reported as sent.
+    In MOCK_MODE, or when SES is not configured (no AWS credentials / verified
+    sender), nothing is sent: the call is logged and reported as sent so the
+    family-alert flow still demos end to end without AWS.
     """
     to_email = _sanitize_header(to_email)
     subject, text_body, html_body = _compose(
@@ -136,8 +138,8 @@ async def send_family_alert(
     )
     subject = _sanitize_header(subject)
 
-    if settings.mock_mode:
-        logger.info("MOCK_MODE: family alert (risk=%s) not actually sent.", risk_level)
+    if settings.mock_mode or not settings.ses_configured:
+        logger.info("Family alert (risk=%s) simulated — SES not configured.", risk_level)
         return True
 
     try:

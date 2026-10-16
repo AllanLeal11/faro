@@ -142,12 +142,17 @@ class BedrockClient:
             raise LLMError("Bedrock call failed.") from exc
 
 
-class NebiusClient:
-    """OpenAI-compatible Token Factory backend (Nebius hackathon)."""
+class OpenAICompatClient:
+    """A backend for any OpenAI-compatible chat-completions endpoint.
 
-    def __init__(self, *, base_url: str, api_key: str) -> None:
+    Used for Google Gemini (its OpenAI-compatible endpoint) and for Nebius
+    Token Factory — both expose `{base_url}/chat/completions` with a Bearer
+    key, so one client serves both."""
+
+    def __init__(self, *, base_url: str, api_key: str, label: str = "LLM") -> None:
         self._base_url = base_url.rstrip("/")
         self._api_key = api_key
+        self._label = label
 
     async def generate(
         self,
@@ -179,8 +184,13 @@ class NebiusClient:
                 data = resp.json()
             return data["choices"][0]["message"]["content"]
         except (httpx.HTTPError, KeyError, IndexError, ValueError) as exc:
-            logger.warning("Nebius call failed: %s", type(exc).__name__)
-            raise LLMError("Nebius call failed.") from exc
+            logger.warning("%s call failed: %s", self._label, type(exc).__name__)
+            raise LLMError(f"{self._label} call failed.") from exc
+
+
+# Google Gemini's OpenAI-compatible endpoint (verified against the official
+# docs). The client appends "/chat/completions".
+GEMINI_OPENAI_BASE = "https://generativelanguage.googleapis.com/v1beta/openai"
 
 
 def get_llm_client(settings: Settings) -> LLMClient | None:
@@ -192,10 +202,18 @@ def get_llm_client(settings: Settings) -> LLMClient | None:
     if settings.mock_mode:
         return None
 
+    if settings.llm_provider == "google":
+        return OpenAICompatClient(
+            base_url=GEMINI_OPENAI_BASE,
+            api_key=settings.google_api_key,
+            label="Gemini",
+        )
+
     if settings.llm_provider == "nebius":
-        return NebiusClient(
+        return OpenAICompatClient(
             base_url=settings.nebius_base_url,
             api_key=settings.nebius_api_key,
+            label="Nebius",
         )
 
     # Default: Bedrock.
